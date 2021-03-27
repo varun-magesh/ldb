@@ -22,15 +22,28 @@ def init(destpath):
 
 @cli.command()
 @click.option('-p', '--pdf', type=click.Path(exists=True), prompt=True)
-@click.option('-b', '--bib', type=str, prompt=True)
+@click.option('-b', '--bib', type=str, prompt=False, default=None)
 def add(pdf, bib):
     from pybtex.database import parse_file
+    from binascii import b2a_hex
+    from tempfile import gettempdir
     ldir = dirs.ldbdir()
     if not ldir:
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
         raise click.Abort()
     # TODO confirm short title
-    bibdata = parse_file(bib).entries
+    
+    bibfile = bib
+    if not bib:
+        tmpname = f"ldb-tmp-{b2a_hex(os.urandom(12)).decode('utf-8')}.bib"
+        tmpbib = os.path.join(gettempdir(), tmpname)
+        with open(tmpbib, "w") as notes:
+            # TODO write something helpful
+            notes.writelines([f"Paste a bibtex file here, save, and close"])
+        os.system(f"vim {tmpbib}")
+        bibfile = tmpbib
+    bibdata = parse_file(tmpbib).entries
+
     entries = list(bibdata.keys())
     if len(entries) < 1:
         click.echo("Did not find an entry in the bib file!", err=True)
@@ -45,7 +58,7 @@ def add(pdf, bib):
         raise click.Abort()
     os.mkdir(fpath)
     shutil.copy(pdf, os.path.join(fpath, os.path.basename(pdf)))
-    shutil.copy(bib, os.path.join(fpath, os.path.basename(bib)))
+    shutil.copy(bibfile, os.path.join(fpath, f"{short_title}.bib"))
     with open(os.path.join(fpath, "notes.md"), "w") as notes:
         # TODO write something helpful
         notes.writelines([f"{short_title} Notes"])
