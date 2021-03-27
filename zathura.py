@@ -2,22 +2,30 @@ import asyncio
 from dbus_next.aio import MessageBus
 from dbus_next import Variant
 
-loop = asyncio.get_event_loop()
-async def test(pid):
-    bus = await MessageBus().connect()
+class Zathura:
+    loop = asyncio.get_event_loop()
+    interface = None
 
-    introspection = await bus.introspect(f'org.pwmt.zathura.PID-{pid}', '/org/pwmt/zathura')
-    proxy_object = bus.get_proxy_object(f'org.pwmt.zathura.PID-{pid}', \
-                                        '/org/pwmt/zathura', \
-                                        introspection) \
+    def __init__(self, pid):
+        self.pid = pid
+        Zathura.loop.run_until_complete(self._async_init(),)
 
-    interface = proxy_object.get_interface('org.pwmt.zathura')
+    async def _async_init(self):
+        self.bus = await MessageBus().connect()
+        self.introspection = await self.bus.introspect(f'org.pwmt.zathura.PID-{self.pid}', '/org/pwmt/zathura')
+        self.proxy_object = self.bus.get_proxy_object(f'org.pwmt.zathura.PID-{self.pid}', \
+                                            '/org/pwmt/zathura', \
+                                            self.introspection)
+        self.interface = self.proxy_object.get_interface('org.pwmt.zathura')
 
-    # Use get_[PROPERTY] and set_[PROPERTY] with the property in
-    # snake case to get and set the property.
+    async def async_get_page(self):
+        return await self.interface.get_pagenumber()
 
-    bar_value = await interface.get_pagenumber()
-    return bar_value
+    async def async_get_page(self, page):
+        return await self.interface.call_goto_page(page)
 
-def get_page(pid):
-    return loop.run_until_complete(test(pid),)
+    def get_page(self):
+        return Zathura.loop.run_until_complete(self.async_get_page(),)
+
+    def set_page(self, page):
+        return Zathura.loop.run_until_complete(self.async_get_page(page),)
