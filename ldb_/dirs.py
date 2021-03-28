@@ -8,3 +8,15 @@ def ldbdir(path=os.getcwd()):
             return cpath
         cpath, dpath = dpath, os.path.dirname(dpath)
     return None
+
+def ldbopen(path):
+    """
+    Opens a particular work in Zathura and the corresponding notes in st+vim
+    """
+    from glob import glob
+    notefile = glob(f"{path}/*.md")
+    pdffile = glob(f"{path}/*.pdf")
+    if os.fork():
+        os.system(f"zathura {pdffile}")
+    if os.fork():
+        os.system(f"st vim {notefile}")
