@@ -14,7 +14,6 @@ def ldbopen(path):
     Opens a particular work in Zathura and the corresponding notes in st+vim
     """
     from glob import glob
-    print(path)
     if not ldbdir(path):
         raise ValueError("Path is not in an ldb instance!")
     try:

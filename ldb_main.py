@@ -97,7 +97,7 @@ def open_(name):
         tm = TerminalMenu(flist)
         lindex = tm.show()
         lname = flist[lindex]
-    dirs.ldbopen(os.path.join(dirs.ldbdir(), os.path.basename(lname)))
+    dirs.ldbopen(lname)
      
 
 @cli.command()
