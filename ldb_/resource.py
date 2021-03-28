@@ -15,7 +15,7 @@ class Resource:
     @staticmethod
     def all(path=os.getcwd()):
         # FIXME inefficient but...
-        return [Resource(g) for g in resource_paths(path)]
+        return [Resource(g) for g in resource_paths()]
 
     def __init__(self, fuzzy):
         path, match = process.extractOne(fuzzy, resource_paths())
