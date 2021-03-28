@@ -14,6 +14,7 @@ def ldbopen(path):
     Opens a particular work in Zathura and the corresponding notes in st+vim
     """
     from glob import glob
+    print(path)
     if not ldbdir(path):
         raise ValueError("Path is not in an ldb instance!")
     try:
@@ -23,5 +24,7 @@ def ldbopen(path):
         raise ValueError("PDF and Note files not found!")
     if os.fork():
         os.system(f"zathura {pdffile}")
+        return
     if os.fork():
         os.system(f"st vim {notefile}")
+        return

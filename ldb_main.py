@@ -73,10 +73,32 @@ def open(name):
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
         raise click.Abort()
 
-    flist = [g.strip("/") for g in glob(f"{dirs.ldbdir()}/*/")]
+    flist = glob(f"{dirs.ldbdir()}/*/")
+    lname = ""
     if name:
         # TODO chooser for ambiguous options
-        process.extractOne(name, flist)
+        lname = process.extractOne(name, flist)[0]
     else:
-        lname = TerminalMenu(flist)
-        dirs.ldbopen(lname)
+        tm = TerminalMenu(flist)
+        lindex = tm.show()
+        lname = flist[lindex]
+    dirs.ldbopen(os.path.join(dirs.ldbdir(), os.path.basename(lname)))
+
+@cli.command()
+@click.argument('name', type=str, default=None, required=False)
+def cite(name):
+    from glob import glob
+    from fuzzywuzzy import process
+    if not dirs.ldbdir():
+        click.echo("Not in an ldb directory, or any parent up to /.", err=True)
+        raise click.Abort()
+
+    flist = glob(f"{dirs.ldbdir()}/*/")
+    lname = ""
+    if name:
+        # TODO chooser for ambiguous options
+        lname = process.extractOne(name, flist)[0]
+        flist = [lname]
+    for lpath in flist:
+        bib = glob(f"{lpath}/*.bib")[0]
+        os.system(f"bat --color never {bib}")
