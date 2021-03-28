@@ -23,10 +23,13 @@ def init(destpath):
 @cli.command()
 @click.option('-p', '--pdf', type=click.Path(exists=True), prompt=True)
 @click.option('-b', '--bib', type=str, prompt=False, default=None)
-def add(pdf, bib):
+@click.option('-o', '--ocr', is_flag=True)
+def add(pdf, bib, ocr=False):
     from pybtex.database import parse_file
     from binascii import b2a_hex
     from tempfile import gettempdir
+    import pdftotext
+
     ldir = dirs.ldbdir()
     if not ldir:
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
@@ -57,15 +60,22 @@ def add(pdf, bib):
         click.echo(f"Short title path {fpath} already exists!", err=True)
         raise click.Abort()
     os.mkdir(fpath)
-    shutil.copy(pdf, os.path.join(fpath, f"{short_title}.pdf"))
-    shutil.copy(bibfile, os.path.join(fpath, f"{short_title}.bib"))
+    shutil.copy(pdf, os.path.join(fpath, f"document.pdf"))
+    shutil.copy(bibfile, os.path.join(fpath, f"citation.bib"))
     with open(os.path.join(fpath, "notes.md"), "w") as notes:
         # TODO write something helpful
         notes.writelines([f"{short_title} Notes"])
+    if ocr:
+        raise NotImplementedError()
+    else:
+        with open(os.path.join(fpath, f"document.pdf"), "rb") as f:
+            pdf = pdftotext.PDF(f)
+        with open(os.path.join(fpath, f"raw.txt"), "w") as f:
+            f.write("\n\n".join(pdf))
 
-@cli.command()
+@cli.command("open")
 @click.argument('name', type=str, default=None, required=False)
-def open(name):
+def open_(name):
     from glob import glob
     from fuzzywuzzy import process
     from simple_term_menu import TerminalMenu
