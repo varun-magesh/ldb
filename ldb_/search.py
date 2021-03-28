@@ -65,10 +65,15 @@ def search(term, *args):
         else:
             string = f"{r.short}:{page}    "
 
-        with open(path, "r") as f:
-            txt = f.read()
-            string += hit.highlights("content", text=txt, top=2)
-            string = string.replace("\n", "")
+        try:
+            with open(path, "r") as f:
+                txt = f.read()
+                string += hit.highlights("content", text=txt, top=2)
+                string = string.replace("\n", "")
+        except FileNotFoundError:
+            import click
+            click.echo(f"Indexed file {path} does not exist. Try `$ ldb reindex`.", err=True)
+            raise click.Abort()
         fn = lambda: r.open(page, term.split(" ")[0])
         res.append((r, page, string))
     return res

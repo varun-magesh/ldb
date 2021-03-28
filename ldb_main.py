@@ -143,3 +143,13 @@ def search_cmd(terms):
             res.open(page, terms[0])
     else:
         click.echo(f"No results found for query: {query}")
+
+@cli.command("reindex")
+def search_cmd():
+    if not ldbdir():
+        click.echo("Not in ldb directory!", err=True)
+        raise click.Abort()
+    from ldb_.search import create_index, index_resource
+    create_index()
+    for res in Resource.all():
+        index_resource(res)
