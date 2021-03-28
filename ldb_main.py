@@ -57,7 +57,7 @@ def add(pdf, bib):
         click.echo(f"Short title path {fpath} already exists!", err=True)
         raise click.Abort()
     os.mkdir(fpath)
-    shutil.copy(pdf, os.path.join(fpath, os.path.basename(pdf)))
+    shutil.copy(pdf, os.path.join(fpath, f"{short_title}.pdf"))
     shutil.copy(bibfile, os.path.join(fpath, f"{short_title}.bib"))
     with open(os.path.join(fpath, "notes.md"), "w") as notes:
         # TODO write something helpful
