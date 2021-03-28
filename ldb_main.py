@@ -81,7 +81,7 @@ def add(pdf, bib, ocr=False):
     rawpath = os.path.join(fpath, "raw/")
     os.mkdir(rawpath)
     for i, p in enumerate(pdf):
-        with open(os.path.join(rawpath,f"{i}.txt"), "w") as f:
+        with open(os.path.join(rawpath,f"{i+1}.txt"), "w") as f:
             f.write(p)
 
 @cli.command("open")
