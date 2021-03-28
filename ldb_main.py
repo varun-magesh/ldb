@@ -128,14 +128,18 @@ def cite(name):
 @cli.command("search")
 @click.argument('terms', type=str, nargs=-1)
 def search_cmd(terms):
+    if not ldbdir():
+        click.echo("Not in ldb directory!", err=True)
+        raise click.Abort()
     from ldb_.search import search
     from simple_term_menu import TerminalMenu
     query = " ".join(terms)
-    fnstr = search(query)
-    if len(fnstr):
-        tm = TerminalMenu([q[1] for q in fnstr])
+    res_page_str = search(query)
+    if len(res_page_str):
+        tm = TerminalMenu([q[2] for q in res_page_str])
         idx = tm.show()
         if idx:
-            fnstr[idx][0]()
+            res, page, str_  = res_page_str[idx]
+            res.open(page, terms[0])
     else:
         click.echo(f"No results found for query: {query}")

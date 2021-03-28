@@ -55,6 +55,8 @@ def search(term, *args):
         path = hit["path"]
         page = 0 if "txt" not in path else int(os.path.basename(path)[:-4])
         r = Resource(path)
+        if r.short not in path:
+            raise ValueError("Weird stuff is happening with Resource fuzzyfinding.")
         string = ""
         if "notes" in os.path.basename(path):
             string = f"{r.short}:notes    "
@@ -68,5 +70,5 @@ def search(term, *args):
             string += hit.highlights("content", text=txt, top=2)
             string = string.replace("\n", "")
         fn = lambda: r.open(page, term.split(" ")[0])
-        res.append((fn, string))
+        res.append((r, page, string))
     return res
