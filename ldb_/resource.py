@@ -33,7 +33,7 @@ class Resource:
     def open(self, page=0, find=""):
         if os.fork():
             if find:
-                os.system(f"zathura -P {page} --find={find} {self.document}")
+                os.system(f"zathura -P {page} --find='{find}' {self.document}")
             else:
                 os.system(f"zathura -P {page} {self.document}")
             return

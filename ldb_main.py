@@ -124,3 +124,17 @@ def cite(name):
         rlist = Resource.all()
     for r in rlist:
         os.system(f"bat --color never {r.bib}")
+
+@cli.command("search")
+@click.argument('terms', type=str, nargs=-1)
+def search_cmd(terms):
+    from ldb_.search import search
+    from simple_term_menu import TerminalMenu
+    query = " ".join(terms)
+    fnstr = search(query)
+    if len(fnstr):
+        tm = TerminalMenu([q[1] for q in fnstr])
+        idx = tm.show()
+        fnstr[idx][0]()
+    else:
+        click.echo(f"No results found for query: {query}")

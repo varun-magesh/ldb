@@ -59,6 +59,7 @@ def search(term, *args):
         with open(path, "r") as f:
             txt = f.read()
             string = hit.highlights("content", text=txt, top=2)
-        fn = lambda: r.open(page, string.split("...")[0])
+            string = string.replace("\n", "")
+        fn = lambda: r.open(page, term.split(" ")[0])
         res.append((fn, string))
     return res
