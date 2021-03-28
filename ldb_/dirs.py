@@ -2,7 +2,7 @@ import os
 from fuzzywuzzy import process
 from glob import glob
 
-def ldbdir(path=os.getcwd()):
+def ldbdir():
     cpath = os.getcwd()
     dpath = os.path.dirname(cpath)
     while dpath != cpath: # while not root dir
@@ -11,9 +11,9 @@ def ldbdir(path=os.getcwd()):
         cpath, dpath = dpath, os.path.dirname(dpath)
     return None
 
-def resource_paths(*args):
+def resource_paths():
     from glob import glob
-    return [g[:-1] for g in glob(f"{ldbdir(*args)}/*/")]
+    return [g[:-1] for g in glob(f"{ldbdir()}/*/")]
 
-def indexdir(*args):
-    return os.path.join(ldbdir(*args), ".ldb", "index")
+def indexdir():
+    return os.path.join(ldbdir(), ".ldb", "index")

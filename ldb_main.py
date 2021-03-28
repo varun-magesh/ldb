@@ -23,6 +23,8 @@ def init(destpath):
     ldbpath = os.path.join(destpath, ".ldb/")
     os.mkdir(ldbpath)
     os.mkdir(os.path.join(ldbpath, "whooshindex"))
+    import ldb_.search as search
+    search.create_index()
 
 @cli.command()
 @click.argument('pdf', type=click.Path(exists=True))
@@ -34,6 +36,7 @@ def add(pdf, bib, ocr=False):
     from tempfile import gettempdir
     from ocrmypdf import ocr as do_ocr
     import pdftotext
+    import ldb_.search as search
 
     ldir = ldbdir()
     if not ldir:
@@ -83,6 +86,7 @@ def add(pdf, bib, ocr=False):
     for i, p in enumerate(pdf):
         with open(os.path.join(rawpath,f"{i+1}.txt"), "w") as f:
             f.write(p)
+    search.index_resource(Resource(short_title))
 
 @cli.command("open")
 @click.argument('name', type=str, default=None, required=False)
@@ -101,8 +105,6 @@ def open_(name):
         tm = TerminalMenu([str(r) for r in resources])
         rindex = tm.show()
         resources[rindex].open()
-
-     
 
 @cli.command()
 @click.argument('name', type=str, default=None, required=False)
