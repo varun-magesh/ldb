@@ -17,8 +17,8 @@ class Resource:
         # FIXME inefficient but...
         return [Resource(g) for g in resource_paths(path)]
 
-    def __init__(self, fuzzy, path=os.getcwd()):
-        path, match = process.extractOne(fuzzy, resource_paths(path))
+    def __init__(self, fuzzy):
+        path, match = process.extractOne(fuzzy, resource_paths())
         self.path = path
         self.short = os.path.basename(path)
         self.match = match
@@ -30,9 +30,12 @@ class Resource:
         except IndexError:
             raise ValueError(f"Could not find resource files in {self.path}")
 
-    def open(self):
+    def open(self, page=0, find=""):
         if os.fork():
-            os.system(f"zathura {self.document}")
+            if find:
+                os.system(f"zathura -P {page} --find={find} {self.document}")
+            else:
+                os.system(f"zathura -P {page} {self.document}")
             return
         if os.fork():
             os.system(f"st vim {self.notes}")
