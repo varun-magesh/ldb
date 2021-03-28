@@ -135,6 +135,7 @@ def search_cmd(terms):
     if len(fnstr):
         tm = TerminalMenu([q[1] for q in fnstr])
         idx = tm.show()
-        fnstr[idx][0]()
+        if idx:
+            fnstr[idx][0]()
     else:
         click.echo(f"No results found for query: {query}")
