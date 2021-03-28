@@ -81,5 +81,6 @@ def search(term, *args):
             raise click.Abort()
         strings = [f"{prestring} --- {s}" for s in strings]
         for s in strings:
+            # FIXME pass info about notes, bib, or doc
             res.append((r, page, s))
     return res

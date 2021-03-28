@@ -145,7 +145,7 @@ def search_cmd(terms):
         click.echo(f"No results found for query: {query}")
 
 @cli.command("reindex")
-def search_cmd():
+def reindex():
     if not ldbdir():
         click.echo("Not in ldb directory!", err=True)
         raise click.Abort()
