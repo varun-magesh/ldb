@@ -5,7 +5,8 @@ Cannot be called ldb.py because ldb is already a thing in Python.
 import click
 import os
 import shutil
-from ldb_.resource import Resource, ldbdir
+from ldb_.resource import Resource
+from ldb_.dirs import ldbdir
 
 @click.group()
 def cli():
