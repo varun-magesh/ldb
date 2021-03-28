@@ -75,28 +75,29 @@ def add(pdf, bib, ocr=False):
     with open(os.path.join(fpath, f"document.pdf"), "rb") as f:
         pdf = pdftotext.PDF(f)
     with open(os.path.join(fpath, f"raw.txt"), "w") as f:
-        f.write("\n\n".join(pdf))
+        for i, p in enumerate(pdf):
+            f.write(f"[{i+1}]")
+            f.write(p)
+            f.write("\n\n")
 
 
 @cli.command("open")
 @click.argument('name', type=str, default=None, required=False)
 def open_(name):
-    from glob import glob
-    from fuzzywuzzy import process
     from simple_term_menu import TerminalMenu
     if not dirs.ldbdir():
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
         raise click.Abort()
 
-    flist = glob(f"{dirs.ldbdir()}/*/")
     lname = ""
     if name:
         # TODO chooser for ambiguous options
-        lname = process.extractOne(name, flist)[0]
+        lname = dirs.fuzzyresource(name)[0]
     else:
-        tm = TerminalMenu(flist)
+        tm = TerminalMenu(dirs.resources())
         lindex = tm.show()
-        lname = flist[lindex]
+        lname = dirs.resources()[lindex]
+
     dirs.ldbopen(lname)
      
 
@@ -109,12 +110,11 @@ def cite(name):
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
         raise click.Abort()
 
-    flist = glob(f"{dirs.ldbdir()}/*/")
+    flist = dirs.resources()
     lname = ""
     if name:
         # TODO chooser for ambiguous options
-        lname = process.extractOne(name, flist)[0]
-        flist = [lname]
+        flist = [dirs.fuzzyresource(name)[0]]
     for lpath in flist:
         bib = glob(f"{lpath}/*.bib")[0]
         os.system(f"bat --color never {bib}")

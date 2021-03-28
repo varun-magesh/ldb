@@ -27,3 +27,13 @@ def ldbopen(path):
     if os.fork():
         os.system(f"st vim {notefile}")
         return
+
+def resources():
+    from glob import glob
+    return glob(f"{ldbdir()}/*/")
+
+def fuzzyresource(path):
+    from fuzzywuzzy import process
+    flist = resources()
+    name, match = process.extractOne(path, flist)
+    return name, match
