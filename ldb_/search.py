@@ -53,7 +53,7 @@ def search(term, *args):
     res = []
     for hit in results:
         path = hit["path"]
-        page = int(os.path.basename(path)[:-4])
+        page = 0 if "txt" not in path else int(os.path.basename(path)[:-4])
         r = Resource(path)
         string = ""
         with open(path, "r") as f:
