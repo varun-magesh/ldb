@@ -21,13 +21,14 @@ def init(destpath):
     os.mkdir(ldbpath)
 
 @cli.command()
-@click.option('-p', '--pdf', type=click.Path(exists=True), prompt=True)
+@click.argument('pdf', type=click.Path(exists=True))
 @click.option('-b', '--bib', type=str, prompt=False, default=None)
 @click.option('-o', '--ocr', is_flag=True)
 def add(pdf, bib, ocr=False):
     from pybtex.database import parse_file
     from binascii import b2a_hex
     from tempfile import gettempdir
+    from ocrmypdf import ocr as do_ocr
     import pdftotext
 
     ldir = dirs.ldbdir()
@@ -60,18 +61,22 @@ def add(pdf, bib, ocr=False):
         click.echo(f"Short title path {fpath} already exists!", err=True)
         raise click.Abort()
     os.mkdir(fpath)
-    shutil.copy(pdf, os.path.join(fpath, f"document.pdf"))
     shutil.copy(bibfile, os.path.join(fpath, f"citation.bib"))
     with open(os.path.join(fpath, "notes.md"), "w") as notes:
         # TODO write something helpful
         notes.writelines([f"{short_title} Notes"])
+    pdfpath = os.path.join(fpath, f"document.pdf")
+    # TODO guess if we need ocr
     if ocr:
-        raise NotImplementedError()
+        # TODO apply other ocrmypdf fixes as necessary
+        do_ocr(pdf, pdfpath)
     else:
-        with open(os.path.join(fpath, f"document.pdf"), "rb") as f:
-            pdf = pdftotext.PDF(f)
-        with open(os.path.join(fpath, f"raw.txt"), "w") as f:
-            f.write("\n\n".join(pdf))
+        shutil.copy(pdf, pdfpath)
+    with open(os.path.join(fpath, f"document.pdf"), "rb") as f:
+        pdf = pdftotext.PDF(f)
+    with open(os.path.join(fpath, f"raw.txt"), "w") as f:
+        f.write("\n\n".join(pdf))
+
 
 @cli.command("open")
 @click.argument('name', type=str, default=None, required=False)
@@ -93,6 +98,7 @@ def open_(name):
         lindex = tm.show()
         lname = flist[lindex]
     dirs.ldbopen(os.path.join(dirs.ldbdir(), os.path.basename(lname)))
+     
 
 @cli.command()
 @click.argument('name', type=str, default=None, required=False)
