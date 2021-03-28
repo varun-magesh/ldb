@@ -16,4 +16,4 @@ def resource_paths(*args):
     return [g[:-1] for g in glob(f"{ldbdir(*args)}/*/")]
 
 def indexdir(*args):
-    return os.path.join(ldbdir(path), ".ldb", "index")
+    return os.path.join(ldbdir(*args), ".ldb", "index")
