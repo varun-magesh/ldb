@@ -56,9 +56,16 @@ def search(term, *args):
         page = 0 if "txt" not in path else int(os.path.basename(path)[:-4])
         r = Resource(path)
         string = ""
+        if "notes" in os.path.basename(path):
+            string = f"{r.short}:notes    "
+        elif "bib" in os.path.basename(path):
+            string = f"{r.short}:bib    "
+        else:
+            string = f"{r.short}:{page}    "
+
         with open(path, "r") as f:
             txt = f.read()
-            string = hit.highlights("content", text=txt, top=2)
+            string += hit.highlights("content", text=txt, top=2)
             string = string.replace("\n", "")
         fn = lambda: r.open(page, term.split(" ")[0])
         res.append((fn, string))
