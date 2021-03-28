@@ -6,7 +6,7 @@ from ldb_.dirs import resource_paths, ldbdir
 class Resource:
     path=""
     bib=""
-    raw=""
+    raw=[]
     document=""
     notes=""
     match=0
@@ -23,7 +23,7 @@ class Resource:
         self.short = os.path.basename(path)
         self.match = match
         try:
-            self.raw = os.path.join(glob(f"{self.path}/*.txt")[0])
+            self.raw = sorted(glob(f"{self.path}/raw/*.txt"), key=lambda s: int(os.path.basename(s[:-4])))
             self.notes = os.path.join(glob(f"{self.path}/*.md")[0])
             self.document = os.path.join(glob(f"{self.path}/*.pdf")[0])
             self.bib = os.path.join(glob(f"{self.path}/*.bib")[0])

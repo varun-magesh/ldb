@@ -78,12 +78,11 @@ def add(pdf, bib, ocr=False):
         shutil.copy(pdf, pdfpath)
     with open(os.path.join(fpath, f"document.pdf"), "rb") as f:
         pdf = pdftotext.PDF(f)
-    with open(os.path.join(fpath, f"raw.txt"), "w") as f:
-        for i, p in enumerate(pdf):
-            f.write(f"[+ldb+ {i+1}]")
-            f.write("\n\n")
+    rawpath = os.path.join(fpath, "raw/")
+    os.mkdir(rawpath)
+    for i, p in enumerate(pdf):
+        with open(os.path.join(rawpath,f"{i}.txt"), "w") as f:
             f.write(p)
-            f.write("\n\n")
 
 @cli.command("open")
 @click.argument('name', type=str, default=None, required=False)
