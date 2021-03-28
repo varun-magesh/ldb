@@ -5,7 +5,7 @@ Cannot be called ldb.py because ldb is already a thing in Python.
 import click
 import os
 import shutil
-from ldb_ import dirs
+from ldb_.resource import Resource, ldbdir
 
 @click.group()
 def cli():
@@ -14,11 +14,14 @@ def cli():
 @cli.command()
 @click.argument('destpath', type=click.Path(exists=True), default=os.getcwd())
 def init(destpath):
-    if dirs.ldbdir():
+    from whoosh.fields import Schema, TEXT, ID
+    from whoosh import index
+    if ldbdir():
         click.echo("Please don’t nest ldb instances.", err=True)
         raise click.Abort()
     ldbpath = os.path.join(destpath, ".ldb/")
     os.mkdir(ldbpath)
+    os.mkdir(os.path.join(ldbpath, "whooshindex"))
 
 @cli.command()
 @click.argument('pdf', type=click.Path(exists=True))
@@ -31,7 +34,7 @@ def add(pdf, bib, ocr=False):
     from ocrmypdf import ocr as do_ocr
     import pdftotext
 
-    ldir = dirs.ldbdir()
+    ldir = ldbdir()
     if not ldir:
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
         raise click.Abort()
@@ -46,7 +49,7 @@ def add(pdf, bib, ocr=False):
             notes.writelines([f"Paste a bibtex file here, save, and close"])
         os.system(f"vim {tmpbib}")
         bibfile = tmpbib
-    bibdata = parse_file(tmpbib).entries
+    bibdata = parse_file(bibfile).entries
 
     entries = list(bibdata.keys())
     if len(entries) < 1:
@@ -76,29 +79,29 @@ def add(pdf, bib, ocr=False):
         pdf = pdftotext.PDF(f)
     with open(os.path.join(fpath, f"raw.txt"), "w") as f:
         for i, p in enumerate(pdf):
-            f.write(f"[{i+1}]")
+            f.write(f"[+ldb+ {i+1}]")
+            f.write("\n\n")
             f.write(p)
             f.write("\n\n")
-
 
 @cli.command("open")
 @click.argument('name', type=str, default=None, required=False)
 def open_(name):
     from simple_term_menu import TerminalMenu
-    if not dirs.ldbdir():
+    if not ldbdir():
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
         raise click.Abort()
 
     lname = ""
     if name:
         # TODO chooser for ambiguous options
-        lname = dirs.fuzzyresource(name)[0]
+        Resource(name).open()
     else:
-        tm = TerminalMenu(dirs.resources())
-        lindex = tm.show()
-        lname = dirs.resources()[lindex]
+        resources = Resource.all()
+        tm = TerminalMenu([str(r) for r in resources])
+        rindex = tm.show()
+        resources[rindex].open()
 
-    dirs.ldbopen(lname)
      
 
 @cli.command()
@@ -106,15 +109,16 @@ def open_(name):
 def cite(name):
     from glob import glob
     from fuzzywuzzy import process
-    if not dirs.ldbdir():
+    if not ldbdir():
         click.echo("Not in an ldb directory, or any parent up to /.", err=True)
         raise click.Abort()
 
-    flist = dirs.resources()
+    rlist = []
     lname = ""
     if name:
         # TODO chooser for ambiguous options
-        flist = [dirs.fuzzyresource(name)[0]]
-    for lpath in flist:
-        bib = glob(f"{lpath}/*.bib")[0]
-        os.system(f"bat --color never {bib}")
+        rlist = [Resource(name)]
+    else:
+        rlist = Resource.all()
+    for r in rlist:
+        os.system(f"bat --color never {r.bib}")
