@@ -62,3 +62,21 @@ def add(pdf, bib):
     with open(os.path.join(fpath, "notes.md"), "w") as notes:
         # TODO write something helpful
         notes.writelines([f"{short_title} Notes"])
+
+@cli.command()
+@click.argument('name', type=str, default=None, required=False)
+def open(name):
+    from glob import glob
+    from fuzzywuzzy import process
+    from simple_term_menu import TerminalMenu
+    if not dirs.ldbdir():
+        click.echo("Not in an ldb directory, or any parent up to /.", err=True)
+        raise click.Abort()
+
+    flist = [g.strip("/") for g in glob(f"{dirs.ldbdir()}/*/")]
+    if name:
+        # TODO chooser for ambiguous options
+        process.extractOne(name, flist)
+    else:
+        lname = TerminalMenu(flist)
+        dirs.ldbopen(lname)
