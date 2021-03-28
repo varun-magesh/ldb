@@ -49,7 +49,7 @@ def search(term, *args):
     results = s.search(q)
     results.order = highlight.SCORE
     results.formatter = highlight.UppercaseFormatter()
-    results.fragmenter = highlight.SentenceFragmenter()
+    results.fragmenter = highlight.ContextFragmenter(maxchars=20)
     res = []
     for hit in results:
         path = hit["path"]
@@ -57,23 +57,29 @@ def search(term, *args):
         r = Resource(path)
         if r.short not in path:
             raise ValueError("Weird stuff is happening with Resource fuzzyfinding.")
-        string = ""
+        strings = []
+        prestring = ""
         if "notes" in os.path.basename(path):
-            string = f"{r.short}:notes    "
+            prestring = f"{r.short}:notes"
         elif "bib" in os.path.basename(path):
-            string = f"{r.short}:bib    "
+            prestring = f"{r.short}:bib"
         else:
-            string = f"{r.short}:{page}    "
+            prestring = f"{r.short}:{page}"
 
         try:
             with open(path, "r") as f:
                 txt = f.read()
-                string += hit.highlights("content", text=txt, top=2)
-                string = string.replace("\n", "")
+                import re
+                for h in hit.highlights("content", text=txt, top=3).split("..."):
+                    h = re.sub("\s{2,}", " ", h)
+                    h = h.replace("\n", " ")
+                    h = h.replace("\t", " ")
+                    strings.append(h)
         except FileNotFoundError:
             import click
             click.echo(f"Indexed file {path} does not exist. Try `$ ldb reindex`.", err=True)
             raise click.Abort()
-        fn = lambda: r.open(page, term.split(" ")[0])
-        res.append((r, page, string))
+        strings = [f"{prestring} --- {s}" for s in strings]
+        for s in strings:
+            res.append((r, page, s))
     return res
