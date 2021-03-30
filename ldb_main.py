@@ -142,7 +142,6 @@ def search_cmd(terms):
         idx = tm.show()
         try:
             res, page, str_  = res_page_str[idx]
-            breakpoint()
             res.open(page, terms[0])
         except (IndexError, TypeError):
             pass
