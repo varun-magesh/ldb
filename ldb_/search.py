@@ -36,8 +36,8 @@ def index_resource(res, *args):
     with open(res.notes) as f:
         notestext = f.read()
         notepages = re.split("^### Page \d+", notestext, flags=re.MULTILINE)
-        for pageno_plusone, ntext in enumerate(notepages):
-            w.add_document(content=ntext, path=f"{res.notes}:{pageno_plusone-1}")
+        for pageno, ntext in enumerate(notepages):
+            w.add_document(content=ntext, path=f"{res.notes}:{pageno}")
     w.commit()
 
 def search(term, *args):
@@ -55,8 +55,13 @@ def search(term, *args):
     results.fragmenter = highlight.ContextFragmenter(maxchars=20)
     res = []
     for hit in results:
-        path = hit["path"]
-        page = 0 if "txt" not in path else int(os.path.basename(path)[:-4])
+        path = hit["path"].split(":")[0]
+        page = 0
+        if "notes" in path:
+            page = int(hit["path"].split(":")[1])
+        if "txt" in path:
+            page = int(os.path.basename(path)[:-4])
+             
         r = Resource(path)
         if r.short not in path:
             raise ValueError("Weird stuff is happening with Resource fuzzyfinding.")
