@@ -74,7 +74,7 @@ def search(term, *args):
         strings = []
         prestring = ""
         if "notes" in os.path.basename(path):
-            prestring = f"{r.short}:notes"
+            prestring = f"{r.short} notes:{page}"
         elif "bib" in os.path.basename(path):
             prestring = f"{r.short}:bib"
         else:
