@@ -7,7 +7,7 @@ from whoosh import index
 from ldb_.dirs import indexdir
 from ldb_.resource import Resource
 
-def get_index(path=os.getcwd()):
+def get_index():
     import whoosh.index as windex
     return windex.open_dir(indexdir())
 
@@ -19,9 +19,20 @@ def create_index(path=indexdir()):
     ix = index.create_in(path, schema)
     return ix
 
-def index_resource(res, *args):
+def index_resource_notes(res):
     import re
-    ix = get_index(*args)
+    notestext = ""
+    ix = get_index()
+    w = ix.writer()
+    with open(res.notes) as f:
+        notestext = f.read()
+        notepages = re.split("^### Page \d+", notestext, flags=re.MULTILINE)
+        for pageno, ntext in enumerate(notepages):
+            w.add_document(content=ntext, path=f"{res.notes}:{pageno}")
+    w.commit()
+
+def index_resource(res):
+    ix = get_index()
     w = ix.writer()
     bibtext = ""
     with open(res.bib) as f:
@@ -32,14 +43,8 @@ def index_resource(res, *args):
         with open(page, "r") as f:
             rawtext = f.read()
         w.add_document(content=rawtext, path=page)
-    # TODO paginate notes
-    notestext = ""
-    with open(res.notes) as f:
-        notestext = f.read()
-        notepages = re.split("^### Page \d+", notestext, flags=re.MULTILINE)
-        for pageno, ntext in enumerate(notepages):
-            w.add_document(content=ntext, path=f"{res.notes}:{pageno}")
     w.commit()
+    index_resource_notes(res)
 
 def search(term, *args):
     """
