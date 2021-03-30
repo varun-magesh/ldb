@@ -139,9 +139,12 @@ def search_cmd(terms):
     if len(res_page_str):
         tm = TerminalMenu([q[2] for q in res_page_str])
         idx = tm.show()
-        if idx:
+        try:
             res, page, str_  = res_page_str[idx]
+            breakpoint()
             res.open(page, terms[0])
+        except (IndexError, TypeError):
+            pass
     else:
         click.echo(f"No results found for query: {query}")
 
