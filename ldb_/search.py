@@ -1,6 +1,7 @@
 import os
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
+from whoosh.query import FuzzyTerm
 import whoosh.highlight as highlight
 from whoosh import index
 from ldb_.dirs import indexdir
@@ -46,7 +47,7 @@ def search(term, *args):
     functions to open them.
     """
     ix = get_index(*args)
-    qp = QueryParser("content", schema)
+    qp = QueryParser("content", schema, termclass=FuzzyTerm)
     s = ix.searcher()
     q = qp.parse(term)
     results = s.search(q)
