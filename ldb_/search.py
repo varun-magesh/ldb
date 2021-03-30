@@ -19,6 +19,7 @@ def create_index(path=indexdir()):
     return ix
 
 def index_resource(res, *args):
+    import re
     ix = get_index(*args)
     w = ix.writer()
     bibtext = ""
@@ -34,7 +35,9 @@ def index_resource(res, *args):
     notestext = ""
     with open(res.notes) as f:
         notestext = f.read()
-    w.add_document(content=notestext, path=res.notes)
+        notepages = re.split("^### Page \d+", notestext, flags=re.MULTILINE)
+        for pageno_plusone, ntext in enumerate(notepages):
+            w.add_document(content=ntext, path=f"{res.notes}:{pageno_plusone-1}")
     w.commit()
 
 def search(term, *args):
