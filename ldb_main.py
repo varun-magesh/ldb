@@ -37,6 +37,7 @@ def add(pdf, bib, ocr=False):
     from ocrmypdf import ocr as do_ocr
     import pdftotext
     import ldb_.search as search
+    import ldb_.bibtexample as bibtexample
 
     ldir = ldbdir()
     if not ldir:
@@ -50,7 +51,7 @@ def add(pdf, bib, ocr=False):
         tmpbib = os.path.join(gettempdir(), tmpname)
         with open(tmpbib, "w") as notes:
             # TODO write something helpful
-            notes.writelines([f"Paste a bibtex file here, save, and close"])
+            notes.writelines([bibtexample.text])
         os.system(f"vim {tmpbib}")
         bibfile = tmpbib
     bibdata = parse_file(bibfile).entries
