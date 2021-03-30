@@ -69,9 +69,6 @@ def add(pdf, bib, ocr=False):
         raise click.Abort()
     os.mkdir(fpath)
     shutil.copy(bibfile, os.path.join(fpath, f"citation.bib"))
-    with open(os.path.join(fpath, "notes.md"), "w") as notes:
-        # TODO write something helpful
-        notes.writelines([f"{short_title} Notes"])
     pdfpath = os.path.join(fpath, f"document.pdf")
     # TODO guess if we need ocr
     if ocr:
@@ -86,6 +83,10 @@ def add(pdf, bib, ocr=False):
     for i, p in enumerate(pdf):
         with open(os.path.join(rawpath,f"{i+1}.txt"), "w") as f:
             f.write(p)
+    # Create notes file
+    with open(os.path.join(fpath, "notes.md"), "w") as notes:
+        notes.writelines([f"# {short_title} Notes\n"])
+        notes.writelines([f"### Page {i+1}\n" for i, p in enumerate(pdf)])
     search.index_resource(Resource(short_title))
 
 @cli.command("open")
