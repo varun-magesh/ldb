@@ -14,8 +14,12 @@ def get_index():
 # TODO add title to schema
 schema = Schema(path=ID(stored=True), content=TEXT(stored=False))
 def create_index(path=indexdir()):
-    if not os.path.exists(path):
-        os.mkdir(path)
+    from shutil import rmtree
+    try:
+        rmtree(path)
+    except FileNotFoundError:
+        pass
+    os.mkdir(path)
     ix = index.create_in(path, schema)
     return ix
 
